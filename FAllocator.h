@@ -7,10 +7,16 @@
 #define FSTRING_FALLOCATOR_H
 #include <cstdio>
 #include <cstdlib>
-namespace sc{
+
+/**
+ * a stateless allocator
+ */
+namespace lshaocong{
 template <typename Tp>
 class FAllocator{
  public:
+  FAllocator<Tp>() = default;
+  ~FAllocator<Tp>(){}
   Tp* allocate(const size_t nb){
     return static_cast<Tp*>(malloc(nb* sizeof(Tp)));
   }
@@ -19,5 +25,6 @@ class FAllocator{
     free(static_cast<void*>(ptr));
   }
 };
+
 }
 #endif //FSTRING_FALLOCATOR_H

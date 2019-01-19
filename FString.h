@@ -10,76 +10,61 @@
 
 #include <atomic>
 #include <assert.h>
+#include <stdlib.h>
+#include <iostream>
+namespace detail {
+#define FSTRING_ASSERT(x) if(!(x)) \
+                  abort();
+}
+namespace lshaocong {
 
-namespace sc {
-typedef std::atomic_int FAtomicInt;
-typedef FAllocator<char> FAlloc;
+typedef std::atomic_int AtomicInt;
 
+template<typename Alloc>
 class FString {
- public:
-  // ctor
-  FString():rcPtr_(nullptr), len_(0){}
-
-  FString(const char *str):rcPtr_(nullptr) {
-    cpyCStr(str);
-    rcPtr_ = new FAtomicInt();
-    incrementRC();
-  }
-  FString(const FString &rhs);
-
-  FString& operator =(const FString &rhs);
-
-  // capacity
-  size_t length() const { return len_; }
-  size_t size() const {return length(); }
-  bool empty() const { return len_ == 0; }
-
-  // element access
-  const char* cstr() const {
-    return str_;
-  }
-
-  // debug function
-  int rc() const {
-    if(rcPtr_) return rcPtr_->load();
-    return 0;
-  }
-
-  ~FString(){
-    if(rcPtr_ && *rcPtr_!= 0)
-      destroy();
-  }
  private:
-  inline void incrementRC() {
-    assert(*rcPtr_ >= 0);
-    void((*rcPtr_)++);
-  }
+  struct RepBase {
+    RepBase():refcount_(0), size_(0), capacity_(0){}
+    AtomicInt refcount_;
+    size_t size_;
+    size_t capacity_;
+  };
 
-  inline void decrementRC(){
-    assert(*rcPtr_ > 0);
-    void((*rcPtr_)--);
-  }
+  struct Rep : public RepBase {
+    char *data_;
 
-  void destroy(){
-    if(rcPtr_){
-      decrementRC();
-      if(*rcPtr_==0){
-        delete rcPtr_;
-        alloc_.deallocate(str_);
+    void dispose(const Alloc &__alloc){
+      if(--this->refcount_ == 0){
+        destroy(__alloc);
       }
     }
+
+    void destroy(const Alloc &__alloc){
+      __alloc.deallocate(data_);
+    }
+  };
+  Rep rep_;
+
+ public:
+  typedef size_t size_type;
+
+  static const size_type npos = static_cast<size_type >(-1);
+  FString(const char *str, size_t count, Alloc alloc = FAllocator<char>());
+  FString(const char *str, Alloc alloc = FAllocator<char>());
+  FString(size_t count, char ch, const Alloc &alloc = FAllocator<char>());
+  FString(){}
+  ~FString(){
   }
 
-  void cpy(const FString &src, FString &dst);
-  void cpyCStr(const char *str);
+  FString& assign(size_t count, char ch);
+  FString& assign(const FString &src);
+  FString& assign(const char *src, size_t count);
 
-  mutable FAtomicInt *rcPtr_;
-  FAlloc alloc_;
+  size_t size() const {
+  }
 
-  size_t len_;
-  char *str_;
+  size_t capacity() const{
+  }
 };
-
-bool operator ==(const FString &lhs, const FString &rhs);
 }
 #endif //FSTRING_H

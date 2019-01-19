@@ -11,3 +11,5 @@ CTestTestfile.cmake
 .idea
 build
 cmake-build-debug
+
+.vscode
