@@ -3,8 +3,8 @@
  * @date 2018-11-04
  */
 
-#ifndef FSTRING_FALLOCATOR_H
-#define FSTRING_FALLOCATOR_H
+#ifndef FALLOCATOR_H
+#define FALLOCATOR_H
 #include <cstdio>
 #include <cstdlib>
 
@@ -17,11 +17,11 @@ class FAllocator{
  public:
   FAllocator<Tp>() = default;
   ~FAllocator<Tp>(){}
-  Tp* allocate(const size_t nb){
+  Tp* allocate(const size_t nb) const {
     return static_cast<Tp*>(malloc(nb* sizeof(Tp)));
   }
 
-  void deallocate(Tp *ptr){
+  void deallocate(Tp *ptr) const {
     free(static_cast<void*>(ptr));
   }
 };

@@ -2,12 +2,12 @@
 #define FSTRINGFWD_H
 namespace lshaocong {
 template<typename T>
-class FAllcoator;
+class FAllocator;
 
 template<typename Alloc>
 class FString;
 
-typedef FAllcoator<char> FAlloc;
+typedef FAllocator<char> FAlloc;
 typedef FString<FAlloc> fstring;
 }
 #endif
